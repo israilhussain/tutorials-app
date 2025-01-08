@@ -1,4 +1,5 @@
 import re
+import subprocess
 import uuid
 from fastapi import UploadFile, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
@@ -76,29 +77,29 @@ def process_file_in_background(temp_file_path, unique_filename, title, db:Sessio
         print(f"Processing file at: {temp_file_path}")
 
         # # Step 1: Encode video
-        # encoded_files = encode_video(temp_file_path)
+        encoded_files = encode_video(temp_file_path)
 
-        # # Step 2: Upload encoded videos to S3 and collect URLs
-        # s3_urls = {}
-        # for file in encoded_files:
-        #     s3_key = os.path.basename(file)
-        #     with open(file, "rb") as f:
-        #         s3_client.upload_fileobj(f, S3_BUCKET_NAME, s3_key)
-        #     s3_url = f"https://{S3_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{s3_key}"
-        #     resolution = s3_key.split('_')[-1].replace('.mp4', '')
-        #     s3_urls[resolution] = s3_url
-        #     print(f"Uploaded {file} to S3: {s3_url}")
+        # Step 2: Upload encoded videos to S3 and collect URLs
+        s3_urls = {}
+        for file in encoded_files:
+            s3_key = os.path.basename(file)
+            with open(file, "rb") as f:
+                s3_client.upload_fileobj(f, S3_BUCKET_NAME, s3_key)
+            s3_url = f"https://{S3_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{s3_key}"
+            resolution = s3_key.split('_')[-1].replace('.mp4', '')
+            s3_urls[resolution] = s3_url
+            print(f"Uploaded {file} to S3: {s3_url}")
 
 
         # Upload the file to S3
-        with open(temp_file_path, "rb") as f:
-            s3_client.upload_fileobj(f, S3_BUCKET_NAME, unique_filename)
+        # with open(temp_file_path, "rb") as f:
+        #     s3_client.upload_fileobj(f, S3_BUCKET_NAME, unique_filename)
 
         # Generate the S3 URL
         s3_url = f"https://{S3_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{unique_filename}"
 
         # Save metadata to the database
-        # new_video = Video(title=title, s3_url=s3_urls["1080p"])  # Default to highest resolution for display
+        new_video = Video(title=title, s3_url=s3_urls["1080p"])  # Default to highest resolution for display
         new_video = Video(title=title, s3_url=s3_url)
         db.add(new_video)
         db.commit()
@@ -134,3 +135,26 @@ def process_file_in_background(temp_file_path, unique_filename, title, db:Sessio
             os.remove(temp_file_path)
         except Exception as e:
             print(f"Error removing temp file: {e}")
+
+
+        
+
+def encode_video(video_path):
+    """
+    Encode the video into multiple resolutions using FFmpeg.
+    """
+    resolutions = ["1080p", "720p", "480p", "240p"]
+    encoded_files = []
+
+    for resolution in resolutions:
+        output_file = f"{video_path.split('.')[0]}_{resolution}.mp4"
+        ffmpeg_command = [
+            "ffmpeg", "-i", video_path,
+            "-vf", f"scale=-2:{resolution.split('p')[0]}",
+            output_file
+        ]
+        subprocess.run(ffmpeg_command, check=True)
+        encoded_files.append(output_file)
+        print(f"Encoded video at {resolution}: {output_file}")
+
+    return encoded_files
