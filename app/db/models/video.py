@@ -1,7 +1,6 @@
 from sqlalchemy import Column, Integer, String
-from .database import Base
-
-
+# from ..base import Base
+from app.db.base import Base
 
 class Video(Base):
     __tablename__ = "videos"
