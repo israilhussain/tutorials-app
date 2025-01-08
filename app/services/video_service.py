@@ -77,7 +77,7 @@ def process_file_in_background(temp_file_path, unique_filename, title, db:Sessio
         print(f"Processing file at: {temp_file_path}")
 
         # # Step 1: Encode video
-        encoded_files = encode_video(temp_file_path)
+        encoded_files = encode_video_in_docker(temp_file_path)
 
         # Step 2: Upload encoded videos to S3 and collect URLs
         s3_urls = {}
@@ -139,9 +139,30 @@ def process_file_in_background(temp_file_path, unique_filename, title, db:Sessio
 
         
 
-def encode_video(video_path):
+# def encode_video(video_path):
+#     """
+#     Encode the video into multiple resolutions using FFmpeg.
+#     """
+#     resolutions = ["1080p", "720p", "480p", "240p"]
+#     encoded_files = []
+
+#     for resolution in resolutions:
+#         output_file = f"{video_path.split('.')[0]}_{resolution}.mp4"
+#         ffmpeg_command = [
+#             "ffmpeg", "-i", video_path,
+#             "-vf", f"scale=-2:{resolution.split('p')[0]}",
+#             output_file
+#         ]
+#         subprocess.run(ffmpeg_command, check=True)
+#         encoded_files.append(output_file)
+#         print(f"Encoded video at {resolution}: {output_file}")
+
+#     return encoded_files
+
+
+def encode_video_in_docker(video_path):
     """
-    Encode the video into multiple resolutions using FFmpeg.
+    Encode the video into multiple resolutions using FFmpeg inside a Docker container.
     """
     resolutions = ["1080p", "720p", "480p", "240p"]
     encoded_files = []
@@ -149,9 +170,12 @@ def encode_video(video_path):
     for resolution in resolutions:
         output_file = f"{video_path.split('.')[0]}_{resolution}.mp4"
         ffmpeg_command = [
-            "ffmpeg", "-i", video_path,
+            "docker", "run", "--rm",
+            "-v", f"{video_path.rsplit('/', 1)[0]}:/videos",  # Mount video directory
+            "jrottenberg/ffmpeg", 
+            "-i", f"/videos/{video_path.rsplit('/', 1)[1]}",  # Input file in container
             "-vf", f"scale=-2:{resolution.split('p')[0]}",
-            output_file
+            f"/videos/{output_file}"  # Output file in container
         ]
         subprocess.run(ffmpeg_command, check=True)
         encoded_files.append(output_file)
