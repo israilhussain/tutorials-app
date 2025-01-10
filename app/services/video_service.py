@@ -77,7 +77,7 @@ def process_file_in_background(temp_file_path, unique_filename, title, db:Sessio
         print(f"Processing file at: {temp_file_path}")
 
         # # Step 1: Encode video
-        encoded_files = encode_video_in_docker(temp_file_path)
+        encoded_files = encode_video_with_ffmpeg(temp_file_path)
 
         # Step 2: Upload encoded videos to S3 and collect URLs
         s3_urls = {}
@@ -185,22 +185,52 @@ def process_file_in_background(temp_file_path, unique_filename, title, db:Sessio
 
 
 
-def encode_video_in_docker(video_path):
-    resolutions = ["1080p", "720p", "480p", "240p"]
+# def encode_video_in_docker(video_path):
+#     resolutions = ["1080p", "720p", "480p", "240p"]
+#     encoded_files = []
+
+#     # Use os.path.splitext to safely extract the filename without extension
+#     base_name, _ = os.path.splitext(video_path)
+
+#     for resolution in resolutions:
+#         output_file = f"{base_name}_{resolution}.mp4"
+#         ffmpeg_command = [
+#             "jrottenberg/ffmpeg", "-i", video_path,
+#             "-vf", f"scale=-2:{resolution.split('p')[0]}",
+#             output_file
+#         ]
+#         subprocess.run(ffmpeg_command, check=True)
+#         encoded_files.append(output_file)
+#         print(f"Encoded video at {resolution}: {output_file}")
+
+#     return encoded_files
+
+import os
+import subprocess
+
+def encode_video_with_ffmpeg(video_path):
+    resolutions = ["720", "480", "240"]  # Resolutions as integers (no 'p')
     encoded_files = []
 
-    # Use os.path.splitext to safely extract the filename without extension
-    base_name, _ = os.path.splitext(video_path)
+    # Extract the base name and directory of the video file
+    base_name, ext = os.path.splitext(video_path)
+    # video_dir = os.path.dirname(video_path)
 
     for resolution in resolutions:
-        output_file = f"{base_name}_{resolution}.mp4"
+        output_file = f"{base_name}_{resolution}p.mp4"  # Add resolution as a suffix
         ffmpeg_command = [
-            "jrottenberg/ffmpeg", "-i", video_path,
-            "-vf", f"scale=-2:{resolution.split('p')[0]}",
+            "ffmpeg", "-i", video_path, 
+            "-vf", f"scale=-2:{resolution}", 
+            "-c:v", "libx264", "-crf", "23", "-preset", "fast", 
             output_file
         ]
-        subprocess.run(ffmpeg_command, check=True)
-        encoded_files.append(output_file)
-        print(f"Encoded video at {resolution}: {output_file}")
-
+        
+        try:
+            print(f"Encoding video to {resolution}p...")
+            subprocess.run(ffmpeg_command, check=True)
+            encoded_files.append(output_file)
+            print(f"Encoded video at {resolution}p: {output_file}")
+        except subprocess.CalledProcessError as e:
+            print(f"Error encoding {resolution}p: {e}")
+    
     return encoded_files
