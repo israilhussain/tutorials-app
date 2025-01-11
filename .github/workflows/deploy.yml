@@ -29,7 +29,12 @@ jobs:
       - name: Push Docker Image to Docker Hub
         run: docker push ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
 
-      # Step 5: Deploy to EC2
+      - name: Decode EC2_PRIVATE_KEY
+        run: echo "${{ secrets.EC2_PRIVATE_KEY }}" | base64 --decode > private_key.pem
+        
+      - name: Set Permissions on the Key
+        run: chmod 400 private_key.pem
+      
       - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -37,8 +42,10 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_PRIVATE_KEY }}
           port: 22
+          key_path: private_key.pem  # Use the decoded private key file
           script: |
             docker pull ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
             docker stop tutorials-app || true
             docker rm tutorials-app || true
             docker run -d -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
+      
