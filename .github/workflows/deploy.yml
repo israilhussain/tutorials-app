@@ -47,5 +47,5 @@ jobs:
             docker pull ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
             docker stop tutorials-app || true
             docker rm tutorials-app || true
-            docker run -d -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
+            docker run -d --env-file /home/ubuntu/myapp/.env -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
       
