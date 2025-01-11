@@ -209,7 +209,7 @@ import os
 import subprocess
 
 def encode_video_with_ffmpeg(video_path):
-    resolutions = ["720", "480", "240"]  # Resolutions as integers (no 'p')
+    resolutions = ["720", "480"]  # Resolutions as integers (no 'p')
     encoded_files = []
 
     # Extract the base name and directory of the video file
