@@ -1,9 +1,9 @@
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.base import Base, engine
 from app.api.v1 import api_router as v1_router
 
-from starlette.middleware.sessions import SessionMiddleware
+# from starlette.middleware.sessions import SessionMiddleware
 import logging
 import os
 
@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI()
 
 # Add SessionMiddleware to manage sessions (cookies)
-app.add_middleware(SessionMiddleware, secret_key="test123")
+# app.add_middleware(SessionMiddleware, secret_key="test123")
 
 # Allow your React app (running at localhost:3000)
 origins = [
