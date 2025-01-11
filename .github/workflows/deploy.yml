@@ -44,8 +44,8 @@ jobs:
           port: 22
           key_path: private_key.pem  # Use the decoded private key file
           script: |
-            docker pull ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
-            docker stop tutorials-app || true
-            docker rm tutorials-app || true
-            docker run -d --env-file /home/ubuntu/myapp/.env -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
+            sudo docker stop tutorials-app || true
+            sudo docker rm tutorials-app || true
+            sudo docker run -d --env-file /home/ubuntu/myapp/.env -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
       
