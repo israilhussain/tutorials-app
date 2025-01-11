@@ -47,5 +47,5 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
             sudo docker stop tutorials-app || true
             sudo docker rm tutorials-app || true
-            sudo docker run -d --env-file /home/ubuntu/myapp/.env -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
+            sudo docker run -d --env-file /home/${{secrets.EC2_USER}}/myapp/.env -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
       
