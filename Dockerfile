@@ -1,23 +1,14 @@
-# Use the official Python image
+# Use a lightweight Python image
 FROM python:3.11-slim
 
-# Set the working directory to match your desired structure
-WORKDIR /tutorials-app
+# Set the working directory inside the container to /app
+WORKDIR /app
 
-# Copy requirements.txt into the working directory
-COPY requirements.txt .
+# Copy your project files into the /app directory inside the container
+COPY . /app
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install the Python dependencies
+RUN pip install --no-cache-dir -r /app/requirements.txt
 
-# Copy the entire project folder into the container
-COPY . .
-
-# Set the working directory to the app directory
-WORKDIR /tutorials-app/app
-
-# Expose the port
-EXPOSE 8000
-
-# Command to run the FastAPI application
+# Command to start the FastAPI server
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
