@@ -14,18 +14,18 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-    #   - name: Set up .env file
-    #     run: |
-    #       echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-    #       echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
-    #       echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
-    #       echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
-    #       echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
-    #       echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
-    #       echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
-    #       echo "SQS_QUEUE_URL=${{ secrets.SQS_QUEUE_URL }}" >> .env
-    #       echo "SNS_TOPIC_ARN=${{ secrets.SNS_TOPIC_ARN }}" >> .env
-    #       echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+      - name: Set up .env file
+        run: |
+          echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+          echo "ALGORITHM=${{ secrets.ALGORITHM }}" >> .env
+          echo "ACCESS_TOKEN_EXPIRE_MINUTES=${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}" >> .env
+          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> .env
+          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> .env
+          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> .env
+          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> .env
+          echo "SQS_QUEUE_URL=${{ secrets.SQS_QUEUE_URL }}" >> .env
+          echo "SNS_TOPIC_ARN=${{ secrets.SNS_TOPIC_ARN }}" >> .env
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
 
       # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
@@ -58,7 +58,12 @@ jobs:
           key_path: private_key.pem  # Use the decoded private key file
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
-            sudo docker stop tutorials-app || true
-            sudo docker rm tutorials-app || true
-            sudo docker run -d -p 8000:8000 --name tutorials-app ${{ secrets.DOCKER_USERNAME }}/tutorials-app:latest
+            # Change to the directory containing docker-compose.yml
+            cd /home/ubuntu/myapp
+
+            # Stop and remove old containers
+            sudo docker-compose down || true
+
+            # Start new containers using the latest image
+            sudo docker-compose up -d
       
