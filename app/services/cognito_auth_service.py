@@ -10,6 +10,8 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_REGION = os.getenv("AWS_REGION")
 CLIENT_ID = os.getenv("COGNITO_APP_CLIENT_ID")
+print("CLIENT_ID: ======================:  ", CLIENT_ID)
+
 
 client = boto3.client("cognito-idp", aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
@@ -17,6 +19,7 @@ client = boto3.client("cognito-idp", aws_access_key_id=AWS_ACCESS_KEY_ID,
 
 
 def cognito_login_service(request: LoginRequest):
+    print("CLIENT_ID: ", CLIENT_ID)
     try:
         response = client.initiate_auth(
             AuthFlow="USER_PASSWORD_AUTH",
