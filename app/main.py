@@ -11,6 +11,8 @@ import asyncio
 # Threading
 import threading
 import time
+
+from app.utils.consume_sqs_messages import consume_sqs_messages
 # from fastapi_auth.auth import get_current_user, authenticate_user, create_access_token
 # from fastapi_auth.database import get_db
 # from sqlalchemy.orm import Session
@@ -50,7 +52,11 @@ origins = [
 
 ]
 
-
+# @app.on_event("startup")
+# async def start_sqs_consumer():
+#     # Start consuming messages on app startup
+#     # asyncio.create_task(consume_sqs_messages())
+#     threading.Thread(target=consume_sqs_messages, daemon=True).start()
 
 # for v1
 app.include_router(v1_router, prefix="/v1")
@@ -171,13 +177,6 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all HTTP methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
 )
-
-
-
-
-
-
-
 
 
 
