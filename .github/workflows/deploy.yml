@@ -26,6 +26,7 @@ jobs:
           echo "SQS_QUEUE_URL=${{ secrets.SQS_QUEUE_URL }}" >> .env
           echo "SNS_TOPIC_ARN=${{ secrets.SNS_TOPIC_ARN }}" >> .env
           echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+          echo "COGNITO_APP_CLIENT_ID=${{ secrets.COGNITO_APP_CLIENT_ID }}" >> .env
 
       # Step 2: Log in to Docker Hub
       - name: Log in to Docker Hub
